@@ -1,5 +1,5 @@
 package solver.types;
 
-public class ObjectiveFunction {
+public class ObjectiveFunction extends BaseFunction {
 
 }
