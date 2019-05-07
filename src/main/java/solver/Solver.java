@@ -1,84 +1,136 @@
 package solver;
 
+import static solver.utils.Utils.alignCenter;
+import static solver.utils.Utils.alignRight;
 import static solver.utils.Utils.getTemporaryFile;
+import static solver.utils.Utils.workbook;
 import static solver.utils.Utils.writeWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import solver.types.Objective;
 import solver.types.Problem;
 import solver.types.Restriction;
 import solver.types.TypesHelper;
+import solver.types.tokens.Composition;
+import solver.types.tokens.Operation;
+import solver.types.tokens.Token;
+import solver.types.tokens.Variable;
 
 public class Solver {
 
 	public static final String RESOURCES = "src/main/resources/";
 
 	public static void main(String[] args) throws IOException {
+		problems();
+	}
+
+	public static void problems() throws IOException {
 		List<Problem> problems = TypesHelper.loadProblemsFromFile(RESOURCES.concat("input/01.txt"));
 		for (Problem p : problems) {
-			System.out.println(p.getObjective().toString());
-			List<Restriction> restrictions = p.getRestrictions();
-			for (Restriction r : restrictions) {
-				System.out.println(r.toString());
-			}
+			create(p);
+			break;
 		}
 	}
 
-	public static final void open() throws FileNotFoundException, IOException {
-		try (FileInputStream file = new FileInputStream(new File("c:/temp/base.xlsx"));) {
-			try (XSSFWorkbook workbook = new XSSFWorkbook();) {
-				Sheet sheet = workbook.createSheet("Persons");
-				sheet.setColumnWidth(0, 6000);
-				sheet.setColumnWidth(1, 4000);
+	public static final void create(Problem problem) throws FileNotFoundException, IOException {
+		try (XSSFWorkbook workbook = workbook();) {
+			Map<Variable, String> variableCells = new LinkedHashMap<>();
+			Sheet sheet = workbook.createSheet("Problema");
+			sheet.setColumnWidth(0, 4000);
 
-				Row header = sheet.createRow(0);
+			int total = problem.getVariables().size() + problem.getRestrictions().size() + 5;
+			for (int i = 0; i < total; i++) {
+				sheet.createRow(i);
+			}
 
-				CellStyle headerStyle = workbook.createCellStyle();
-				headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
-				headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			XSSFCellStyle center = alignCenter(workbook);
+			XSSFCellStyle right = alignRight(workbook);
 
-				XSSFFont font = ((XSSFWorkbook) workbook).createFont();
-				font.setFontName("Arial");
-				font.setFontHeightInPoints((short) 16);
-				font.setBold(true);
-				headerStyle.setFont(font);
+			Row row = sheet.getRow(0);
+			Cell cell = row.createCell(0);
+			cell.setCellStyle(center);
+			cell.setCellValue("Variáveis");
 
-				Cell headerCell = header.createCell(0);
-				headerCell.setCellValue("Name");
-				headerCell.setCellStyle(headerStyle);
+			int rowNumber = 0;
+			for (Variable v : problem.getVariables()) {
+				row = sheet.getRow(++rowNumber);
+				cell = row.createCell(0);
+				cell.setCellStyle(right);
+				cell.setCellValue(v.getValue());
+				variableCells.put(v, String.format("B%d", rowNumber + 1));
+			}
 
-				headerCell = header.createCell(1);
-				headerCell.setCellValue("Age");
-				headerCell.setCellStyle(headerStyle);
+			rowNumber++;
+			row = sheet.getRow(++rowNumber);
+			cell = row.createCell(0);
+			cell.setCellStyle(right);
+			cell.setCellValue("Função Objetivo");
 
-				CellStyle style = workbook.createCellStyle();
-				style.setWrapText(true);
+			cell = row.createCell(1);
+			cell.setCellStyle(right);
+			cell.setCellFormula(getFormulaFromObjective(problem.getObjective(), variableCells));
 
-				Row row = sheet.createRow(2);
-				Cell cell = row.createCell(0);
-				cell.setCellValue("John Smith");
-				cell.setCellStyle(style);
+			rowNumber++;
+			row = sheet.getRow(++rowNumber);
+			cell = row.createCell(0);
+			cell.setCellStyle(center);
+			cell.setCellValue("Restrições");
 
-				cell = row.createCell(1);
-				cell.setCellValue(20);
-				cell.setCellStyle(style);
+			for (int i = 1; i <= problem.getRestrictions().size(); i++) {
+				row = sheet.getRow(++rowNumber);
+				cell = row.createCell(0);
+				cell.setCellStyle(right);
+				cell.setCellValue(String.format("r%d", i));
+			}
 
-				writeWorkbook(workbook, getTemporaryFile("temp"));
+//
+//			row = sheet.createRow(1);
+//			cell = row.createCell(0);
+//			cell.setCellValue("x1");
+//			cell = row.createCell(1);
+//			cell.setCellValue(4);
+//
+//			row = sheet.createRow(2);
+//			cell = row.createCell(0);
+//			cell.setCellValue("x2");
+//			cell = row.createCell(1);
+//			cell.setCellValue(4);
+
+			writeWorkbook(workbook, getTemporaryFile("temp"));
+		}
+	}
+
+	private static String getFormulaFromObjective(Objective objective, Map<Variable, String> variableCells) {
+		StringBuilder sb = new StringBuilder();
+		List<Token<?>> tokens = new LinkedList<>(objective.getTokens());
+		tokens.remove(0);
+		tokens.remove(0);
+
+		for (Token<?> token : tokens) {
+			if (token instanceof Composition) {
+				Composition composition = (Composition) token;
+				sb.append(composition.getValue().toString());
+				sb.append("*");
+				sb.append(variableCells.get(composition.getVariable()));
+
+			} else if (token instanceof Operation) {
+				sb.append(((Operation) token).toString());
 			}
 		}
+
+		return sb.toString();
 	}
 
 }

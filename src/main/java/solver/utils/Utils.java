@@ -5,32 +5,44 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 public class Utils {
 
-	private static final String WORD1 = "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE";
-	private static final String WORD2 = "C:\\Program Files\\Microsoft Office\\Office16\\WINWORD.EXE";
 	private static final DecimalFormat DF = new DecimalFormat("#.##");
 
-	public static final void writePresentation(XMLSlideShow ppt, String fileName) throws IOException {
+	public static final XSSFWorkbook workbook() {
+		return new XSSFWorkbook();
+	}
+
+	public static final void writeWorkbook(XSSFWorkbook workbook, String fileName) throws IOException {
 		try (FileOutputStream out = new FileOutputStream(new File(fileName));) {
-			ppt.write(out);
+			workbook.write(out);
 		}
 	}
 
-	public static final void writeDocument(XWPFDocument doc, String fileName) throws IOException {
-		try (FileOutputStream out = new FileOutputStream(new File(fileName));) {
-			doc.write(out);
-		}
+	public static final XSSFCellStyle alignRight(XSSFWorkbook workbook) {
+		XSSFCellStyle style = workbook.createCellStyle();
+		style.setAlignment(HorizontalAlignment.RIGHT);
+		style.setVerticalAlignment(VerticalAlignment.BOTTOM);
+		return style;
 	}
 
-	public static final void writeWorkbook(XSSFWorkbook xls, String fileName) throws IOException {
-		try (FileOutputStream out = new FileOutputStream(new File(fileName));) {
-			xls.write(out);
-		}
+	public static final XSSFCellStyle alignLeft(XSSFWorkbook workbook) {
+		XSSFCellStyle style = workbook.createCellStyle();
+		style.setAlignment(HorizontalAlignment.LEFT);
+		style.setVerticalAlignment(VerticalAlignment.BOTTOM);
+		return style;
+	}
+
+	public static final XSSFCellStyle alignCenter(XSSFWorkbook workbook) {
+		XSSFCellStyle style = workbook.createCellStyle();
+		style.setAlignment(HorizontalAlignment.CENTER);
+		style.setVerticalAlignment(VerticalAlignment.BOTTOM);
+		return style;
 	}
 
 	public static final String getTemporaryFile(String name) {
@@ -41,24 +53,6 @@ public class Utils {
 
 	public static final String formatFloat(Float number) {
 		return DF.format(number);
-	}
-
-	private static final String getWord() {
-		if (new File(WORD1).exists()) {
-			return WORD1;
-		} else if (new File(WORD2).exists()) {
-			return WORD2;
-		}
-		return "";
-	}
-
-	public static final void execWord(String path) {
-		String cmd = String.format("\"%s\" /n \"%s\"", getWord(), path);
-		try {
-			Runtime.getRuntime().exec(cmd);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 }
