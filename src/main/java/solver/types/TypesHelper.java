@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -19,6 +21,7 @@ import solver.types.tokens.Variable;
 
 public class TypesHelper {
 
+	private static final String COMPOSITION = "([0-9]+(,[0-9]+)*)*([a-zA-Z]+[0-9]*)";
 	private static final int INDEX_TYP = 0;
 	private static final int INDEX_OBJ = 1;
 
@@ -89,8 +92,6 @@ public class TypesHelper {
 			function.addToken(new Comparation(element));
 		} else if (isOperation(element)) {
 			function.addToken(new Operation(element));
-		} else if (isVariable(element)) {
-			function.addToken(new Variable(element));
 		} else if (isComposition(element)) {
 			function.addToken(processComposition(element));
 		} else if (isFloat(element)) {
@@ -100,9 +101,14 @@ public class TypesHelper {
 
 	private static Composition processComposition(String element) {
 		Composition composition = new Composition();
-		String[] chars = element.split("");
-		for (String c : chars) {
-			System.out.println(c);
+
+		Pattern pattern = Pattern.compile(COMPOSITION);
+		Matcher matcher = pattern.matcher(element);
+		if (matcher.find()) {
+			Float number = matcher.group(1) == null ? 1F : Float.valueOf(matcher.group(1).replace(",", "."));
+			String value = matcher.group(3);
+			composition.setValue(new FloatPrimitive(number));
+			composition.setVariable(new Variable(value));
 		}
 
 		return composition;
@@ -117,18 +123,11 @@ public class TypesHelper {
 	}
 
 	private static boolean isComposition(String element) {
-		return element.matches("[0-9]+[a-z]+[0-9]*");
+		return element.matches(COMPOSITION);
 	}
 
 	private static boolean isComparation(String element) {
 		return element.equals("=") || element.equals(">=") || element.equals("<=");
-	}
-
-	private static boolean isVariable(String element) {
-		if (StringUtils.isNumeric(element.substring(0, 1))) {
-			return false;
-		}
-		return true;
 	}
 
 	private static List<String> getElements(String str) {

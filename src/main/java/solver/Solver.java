@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import solver.types.Problem;
+import solver.types.Restriction;
 import solver.types.TypesHelper;
 
 public class Solver {
@@ -29,6 +30,10 @@ public class Solver {
 		List<Problem> problems = TypesHelper.loadProblemsFromFile(RESOURCES.concat("input/01.txt"));
 		for (Problem p : problems) {
 			System.out.println(p.getObjective().toString());
+			List<Restriction> restrictions = p.getRestrictions();
+			for (Restriction r : restrictions) {
+				System.out.println(r.toString());
+			}
 		}
 	}
 
