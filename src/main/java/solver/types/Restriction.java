@@ -1,5 +1,5 @@
 package solver.types;
 
-public class Restriction extends BaseFunction {
+public class Restriction extends Function {
 
 }

@@ -17,7 +17,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import solver.types.ObjectiveFunction;
+import solver.types.Objective;
 import solver.types.Restriction;
 import solver.types.tokens.Comparation;
 import solver.types.tokens.Composition;
@@ -35,7 +35,7 @@ public class Solver {
 		r.addToken(new Comparation(">="));
 		r.addToken(new FloatPrimitive(20F));
 		
-		ObjectiveFunction o = new ObjectiveFunction();
+		Objective o = new Objective();
 		o.addToken(new Variable("z"));
 
 		System.out.println(r.toString());

@@ -5,7 +5,7 @@ import java.util.List;
 
 import solver.types.tokens.Token;
 
-public class BaseFunction {
+public class Function {
 
 	private List<Token<?>> tokens = new LinkedList<>();
 
