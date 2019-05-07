@@ -14,7 +14,7 @@ public class Problem {
 
 	@Getter
 	@Setter
-	private Objective objectiveFunction;
+	private Objective objective;
 	@Getter
 	private List<Restriction> restrictions = new LinkedList<>();
 

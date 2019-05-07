@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -17,28 +18,18 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import solver.types.Objective;
-import solver.types.Restriction;
-import solver.types.tokens.Comparation;
-import solver.types.tokens.Composition;
-import solver.types.tokens.FloatPrimitive;
-import solver.types.tokens.Operation;
-import solver.types.tokens.Variable;
+import solver.types.Problem;
+import solver.types.TypesHelper;
 
 public class Solver {
 
-	public static void main(String[] args) {
-		Restriction r = new Restriction();
-		r.addToken(new Composition(new FloatPrimitive(3F), new Variable("x1")));
-		r.addToken(new Operation("+"));
-		r.addToken(new Composition(new FloatPrimitive(2F), new Variable("x2")));
-		r.addToken(new Comparation(">="));
-		r.addToken(new FloatPrimitive(20F));
-		
-		Objective o = new Objective();
-		o.addToken(new Variable("z"));
+	public static final String RESOURCES = "src/main/resources/";
 
-		System.out.println(r.toString());
+	public static void main(String[] args) throws IOException {
+		List<Problem> problems = TypesHelper.loadProblemsFromFile(RESOURCES.concat("input/01.txt"));
+		for (Problem p : problems) {
+			System.out.println(p.getObjective().toString());
+		}
 	}
 
 	public static final void open() throws FileNotFoundException, IOException {

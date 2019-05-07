@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
+import solver.types.tokens.Comparation;
+import solver.types.tokens.Composition;
+import solver.types.tokens.FloatPrimitive;
+import solver.types.tokens.Operation;
 import solver.types.tokens.Variable;
 
 public class TypesHelper {
@@ -48,6 +52,7 @@ public class TypesHelper {
 					setRestriction(line, problem);
 					break;
 				}
+				index++;
 			}
 		}
 	}
@@ -58,13 +63,15 @@ public class TypesHelper {
 	}
 
 	private static void setObjective(String line, Problem problem) {
-		Function function = getFunction(line);
-		problem.setObjectiveFunction((Objective) function);
+		Objective objective = new Objective();
+		objective.assign(getFunction(line));
+		problem.setObjective(objective);
 	}
 
 	private static void setRestriction(String line, Problem problem) {
-		Function function = getFunction(line);
-		problem.addRestriction((Restriction) function);
+		Restriction restriction = new Restriction();
+		restriction.assign(getFunction(line));
+		problem.addRestriction(restriction);
 
 	}
 
@@ -78,20 +85,27 @@ public class TypesHelper {
 	}
 
 	private static void processElement(String element, Function function) {
-		if (isVariable(element)) {
+		if (isComparation(element)) {
+			function.addToken(new Comparation(element));
+		} else if (isOperation(element)) {
+			function.addToken(new Operation(element));
+		} else if (isVariable(element)) {
 			function.addToken(new Variable(element));
-		} else if (isComparation(element)) {
-
+		} else if (isComposition(element)) {
+			function.addToken(processComposition(element));
+		} else if (isFloat(element)) {
+			function.addToken(new FloatPrimitive(Float.valueOf(element)));
 		}
-		if (isComposition(element)) {
+	}
 
+	private static Composition processComposition(String element) {
+		Composition composition = new Composition();
+		String[] chars = element.split("");
+		for (String c : chars) {
+			System.out.println(c);
 		}
-		if (isFloat(element)) {
 
-		}
-		if (isOperation(element)) {
-
-		}
+		return composition;
 	}
 
 	private static boolean isOperation(String element) {
@@ -103,7 +117,7 @@ public class TypesHelper {
 	}
 
 	private static boolean isComposition(String element) {
-		return element.matches("[0-9]+[a-z]+");
+		return element.matches("[0-9]+[a-z]+[0-9]*");
 	}
 
 	private static boolean isComparation(String element) {
@@ -118,7 +132,7 @@ public class TypesHelper {
 	}
 
 	private static List<String> getElements(String str) {
-		return Collections.list(new StringTokenizer(str, "\\s")).stream().map(token -> ((String) token).trim())
+		return Collections.list(new StringTokenizer(str, " ")).stream().map(token -> ((String) token).trim())
 				.collect(Collectors.toList());
 	}
 
