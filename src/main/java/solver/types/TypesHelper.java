@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
+import solver.types.tokens.Variable;
+
 public class TypesHelper {
 
 	private static final int INDEX_TYP = 0;
@@ -76,12 +78,47 @@ public class TypesHelper {
 	}
 
 	private static void processElement(String element, Function function) {
-		// TODO Auto-generated method stub
+		if (isVariable(element)) {
+			function.addToken(new Variable(element));
+		} else if (isComparation(element)) {
 
+		}
+		if (isComposition(element)) {
+
+		}
+		if (isFloat(element)) {
+
+		}
+		if (isOperation(element)) {
+
+		}
+	}
+
+	private static boolean isOperation(String element) {
+		return element.equals("+") || element.equals("-"); // || element.equals(".") || element.equals("/");
+	}
+
+	private static boolean isFloat(String element) {
+		return StringUtils.isNumeric(element);
+	}
+
+	private static boolean isComposition(String element) {
+		return element.matches("[0-9]+[a-z]+");
+	}
+
+	private static boolean isComparation(String element) {
+		return element.equals("=") || element.equals(">=") || element.equals("<=");
+	}
+
+	private static boolean isVariable(String element) {
+		if (StringUtils.isNumeric(element.substring(0, 1))) {
+			return false;
+		}
+		return true;
 	}
 
 	private static List<String> getElements(String str) {
-		return Collections.list(new StringTokenizer(str, "\\s")).stream().map(token -> (String) token)
+		return Collections.list(new StringTokenizer(str, "\\s")).stream().map(token -> ((String) token).trim())
 				.collect(Collectors.toList());
 	}
 
