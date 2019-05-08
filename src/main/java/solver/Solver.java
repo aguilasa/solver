@@ -3,8 +3,8 @@ package solver;
 import static solver.utils.Utils.alignCenter;
 import static solver.utils.Utils.alignRight;
 import static solver.utils.Utils.getTemporaryFile;
-import static solver.utils.Utils.workbook;
-import static solver.utils.Utils.writeWorkbook;
+import static solver.utils.Utils.readWorkbook;
+import static solver.utils.Utils.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import solver.types.Problem;
+import solver.types.ProblemType;
 import solver.types.Restriction;
 import solver.types.TypesHelper;
 import solver.types.tokens.Composition;
@@ -28,19 +29,20 @@ import solver.types.tokens.Variable;
 public class Solver {
 
 	public static final String RESOURCES = "src/main/resources/";
+	public static final String INPUT = RESOURCES.concat("input/");
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		problems();
 	}
 
-	public static void problems() throws IOException {
-		try (XSSFWorkbook workbook = workbook();) {
-			List<Problem> problems = TypesHelper.loadProblemsFromFile(RESOURCES.concat("input/01.txt"));
+	public static void problems() throws Exception {
+		try (XSSFWorkbook workbook = readWorkbook(INPUT.concat("base.xlsm"));) {
+			List<Problem> problems = TypesHelper.loadProblemsFromFile(INPUT.concat("01.txt"));
 			int count = 0;
 			for (Problem p : problems) {
 				create(p, workbook, ++count);
 			}
-			writeWorkbook(workbook, getTemporaryFile("temp"));
+			writeWorkbook(workbook, getTemporaryFile("temp", true));
 		}
 	}
 
@@ -49,20 +51,27 @@ public class Solver {
 		Sheet sheet = workbook.createSheet(String.format("Problema%s", index));
 		sheet.setColumnWidth(0, 4000);
 
-		int total = problem.getVariables().size() + problem.getRestrictions().size() + 5;
+		int total = problem.getVariables().size() + problem.getRestrictions().size() + 6;
 		for (int i = 0; i < total; i++) {
 			sheet.createRow(i);
 		}
 
+		XSSFCellStyle left = alignLeft(workbook);
 		XSSFCellStyle center = alignCenter(workbook);
 		XSSFCellStyle right = alignRight(workbook);
 
-		Row row = sheet.getRow(0);
+		int rowNumber = 0;
+		Row row = sheet.getRow(rowNumber);
 		Cell cell = row.createCell(0);
-		cell.setCellStyle(center);
+		cell.setCellStyle(left);
+		ProblemType problemType = problem.getProblemType();
+		cell.setCellValue(problemType.equals(ProblemType.MAX) ? "Máximo" : "Mínimo");
+
+		row = sheet.getRow(++rowNumber);
+		cell = row.createCell(0);
+		cell.setCellStyle(left);
 		cell.setCellValue("Variáveis");
 
-		int rowNumber = 0;
 		for (Variable v : problem.getVariables()) {
 			row = sheet.getRow(++rowNumber);
 			cell = row.createCell(0);
@@ -74,7 +83,7 @@ public class Solver {
 		rowNumber++;
 		row = sheet.getRow(++rowNumber);
 		cell = row.createCell(0);
-		cell.setCellStyle(right);
+		cell.setCellStyle(left);
 		cell.setCellValue("Função Objetivo");
 
 		cell = row.createCell(1);

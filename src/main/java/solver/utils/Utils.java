@@ -1,12 +1,14 @@
 package solver.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -22,6 +24,11 @@ public class Utils {
 		try (FileOutputStream out = new FileOutputStream(new File(fileName));) {
 			workbook.write(out);
 		}
+	}
+
+	public static final XSSFWorkbook readWorkbook(String fileName) throws Exception {
+		FileInputStream in = new FileInputStream(new File(fileName));
+		return (XSSFWorkbook) WorkbookFactory.create(in);
 	}
 
 	public static final XSSFCellStyle alignRight(XSSFWorkbook workbook) {
@@ -46,9 +53,13 @@ public class Utils {
 	}
 
 	public static final String getTemporaryFile(String name) {
+		return getTemporaryFile(name, false);
+	}
+
+	public static final String getTemporaryFile(String name, boolean macro) {
 		File currDir = new File(".");
 		String path = currDir.getAbsolutePath();
-		return path.substring(0, path.length() - 1).concat(name).concat(".xlsx");
+		return path.substring(0, path.length() - 1).concat(name).concat(".xls").concat(macro ? "m" : "x");
 	}
 
 	public static final String formatFloat(Float number) {
