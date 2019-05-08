@@ -21,10 +21,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import solver.types.Objective;
 import solver.types.Problem;
-import solver.types.Restriction;
 import solver.types.TypesHelper;
 import solver.types.tokens.Composition;
-import solver.types.tokens.Operation;
 import solver.types.tokens.Token;
 import solver.types.tokens.Variable;
 
@@ -114,23 +112,23 @@ public class Solver {
 
 	private static String getFormulaFromObjective(Objective objective, Map<Variable, String> variableCells) {
 		StringBuilder sb = new StringBuilder();
-		List<Token<?>> tokens = new LinkedList<>(objective.getTokens());
-		tokens.remove(0);
-		tokens.remove(0);
 
+		getFormulaFromTokens(variableCells, sb, objective.getTokens());
+
+		return sb.toString();
+	}
+
+	private static void getFormulaFromTokens(Map<Variable, String> variableCells, StringBuilder sb, List<Token<?>> tokens) {
 		for (Token<?> token : tokens) {
 			if (token instanceof Composition) {
 				Composition composition = (Composition) token;
 				sb.append(composition.getValue().toString());
 				sb.append("*");
 				sb.append(variableCells.get(composition.getVariable()));
-
-			} else if (token instanceof Operation) {
-				sb.append(((Operation) token).toString());
+			} else {
+				sb.append(token.toString());
 			}
 		}
-
-		return sb.toString();
 	}
 
 }

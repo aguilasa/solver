@@ -4,29 +4,26 @@ import java.util.LinkedList;
 import java.util.List;
 
 import lombok.Getter;
+import solver.types.tokens.Comparation;
 import solver.types.tokens.Token;
 
-public class Function {
+public abstract class Function {
 
 	@Getter
-	private List<Token<?>> tokens = new LinkedList<>();
+	protected List<Token<?>> tokens = new LinkedList<>();
+	
+	@Getter
+	protected Comparation comparation;
 
 	public void addToken(Token<?> token) {
-		tokens.add(token);
-	}
-
-	public void assign(Function other) {
-		tokens.clear();
-		tokens.addAll(other.getTokens());
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder ts = new StringBuilder();
-		for (Token<?> token : tokens) {
-			ts.append(" ");
-			ts.append(token.toString());
+		if (token instanceof Comparation) {
+			comparation = (Comparation) token;
+		} else {
+			tokens.add(token);
 		}
-		return ts.toString().trim();
 	}
+	
+	@Override
+	public abstract String toString();
+
 }

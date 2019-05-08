@@ -5,5 +5,7 @@ public interface Token<T> {
 	T getValue();
 	
 	void setValue(T value);
+	
+	public String toString();
 
 }

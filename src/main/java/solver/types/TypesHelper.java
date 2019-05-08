@@ -67,24 +67,22 @@ public class TypesHelper {
 
 	private static void setObjective(String line, Problem problem) {
 		Objective objective = new Objective();
-		objective.assign(getFunction(line));
+		processFunction(line, objective);
 		problem.setObjective(objective);
 	}
 
 	private static void setRestriction(String line, Problem problem) {
 		Restriction restriction = new Restriction();
-		restriction.assign(getFunction(line));
+		processFunction(line, restriction);
 		problem.addRestriction(restriction);
 
 	}
 
-	private static Function getFunction(String line) {
-		Function function = new Function();
+	private static void processFunction(String line, Function function) {
 		List<String> elements = getElements(line);
 		for (String element : elements) {
 			processElement(element, function);
 		}
-		return function;
 	}
 
 	private static void processElement(String element, Function function) {
@@ -131,8 +129,7 @@ public class TypesHelper {
 	}
 
 	private static List<String> getElements(String str) {
-		return Collections.list(new StringTokenizer(str, " ")).stream().map(token -> ((String) token).trim())
-				.collect(Collectors.toList());
+		return Collections.list(new StringTokenizer(str, " ")).stream().map(token -> ((String) token).trim()).collect(Collectors.toList());
 	}
 
 }

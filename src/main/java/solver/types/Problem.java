@@ -36,8 +36,7 @@ public class Problem {
 
 	private void processVariables() {
 		variables.clear();
-		List<Token<?>> tokens = new LinkedList<>(objective.getTokens());
-		tokens.remove(0);
+		List<Token<?>> tokens = objective.getTokens();
 		for (Token<?> token : tokens) {
 			if (token instanceof Composition) {
 				variables.add(((Composition) token).getVariable());
