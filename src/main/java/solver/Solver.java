@@ -1,13 +1,15 @@
 package solver;
 
 import static solver.utils.Utils.alignCenter;
+import static solver.utils.Utils.alignLeft;
 import static solver.utils.Utils.alignRight;
 import static solver.utils.Utils.getTemporaryFile;
 import static solver.utils.Utils.readWorkbook;
-import static solver.utils.Utils.*;
+import static solver.utils.Utils.writeWorkbook;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,10 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFShape;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import solver.types.Problem;
@@ -32,7 +38,23 @@ public class Solver {
 	public static final String INPUT = RESOURCES.concat("input/");
 
 	public static void main(String[] args) throws Exception {
-		problems();
+		textBox();
+	}
+
+	public static void textBox() throws Exception {
+		try (XSSFWorkbook workbook = readWorkbook(INPUT.concat("pasta.xlsx"));) {
+			XSSFSheet sheet = workbook.getSheetAt(0);
+			XSSFDrawing drawing = sheet.getDrawingPatriarch();
+			List<XSSFShape> shapes = drawing.getShapes();
+			Iterator<XSSFShape> it = shapes.iterator();
+			while (it.hasNext()) {
+				XSSFShape shape = it.next();
+				if (shape instanceof XSSFSimpleShape) {
+					XSSFSimpleShape textBox = (XSSFSimpleShape) shape;
+					System.out.println(textBox.getText());
+				}
+			}
+		}
 	}
 
 	public static void problems() throws Exception {
