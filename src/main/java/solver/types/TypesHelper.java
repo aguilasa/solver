@@ -67,15 +67,26 @@ public class TypesHelper {
 
 	private static void setObjective(String line, Problem problem) {
 		Objective objective = new Objective();
+
+		List<String> names = null;
+		String[] values = line.split("\\|");
+		if (values.length == 2) {
+			line = values[0].trim();
+			names = getNames(values[1]);
+		}
+
 		processFunction(line, objective);
-		problem.setObjective(objective);
+		problem.setObjective(objective, names);
 	}
 
 	private static void setRestriction(String line, Problem problem) {
 		Restriction restriction = new Restriction();
 		processFunction(line, restriction);
 		problem.addRestriction(restriction);
+	}
 
+	private static List<String> getNames(String value) {
+		return Collections.list(new StringTokenizer(value, ",")).stream().map(token -> ((String) token).trim()).collect(Collectors.toList());
 	}
 
 	private static void processFunction(String line, Function function) {
@@ -106,7 +117,7 @@ public class TypesHelper {
 			Float number = matcher.group(1) == null ? 1F : Float.valueOf(matcher.group(1).replace(",", "."));
 			String value = matcher.group(3);
 			composition.setValue(new FloatPrimitive(number));
-			composition.setVariable(new Variable(value));
+			composition.setVariable(new Variable(value, ""));
 		}
 
 		return composition;

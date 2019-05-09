@@ -1,19 +1,19 @@
 max
-z = 2x1 + 7x2
+z = 2x1 + 7x2 | Variável 1, Variável 2
 3x1 + 2x2 >= 20
 4x1 + 4x2 = 32
 x1 >= 0
 x2 >= 0
 
 min
-z = x1 + 2x2
+z = x1 + 2x2 | Variável 1, Variável 2
 5x1 - 5x2 >= 10
 3x1 + x2 <= 12
 x1 >= 0
 x2 >= 0
 
 min
-z = 0,4x1 + 0,5x2
+z = 0,4x1 + 0,5x2 | Variável 1, Variável 2
 0,3x1 + 0,1x2 <= 27
 0,5x1 + 0,5x2 = 6
 0,6x1 + 0,4x2 >= 6
@@ -21,7 +21,7 @@ x1 >= 0
 x2 >= 0
 
 max
-z = 3x1 + 5x2
+z = 3x1 + 5x2 | Variável 1, Variável 2
 x1 <= 4
 2x2 <= 12
 3x1 + 2x2 = 18
@@ -29,7 +29,7 @@ x1 >= 0
 x2 >= 0
 
 max
-z = x1 + 3x2
+z = x1 + 3x2 | Variável 1, Variável 2
 3x1 - 2x2 >= 10
 2x1 + 3x2 = 34
 4x1 + 12x2 <= 104
@@ -37,7 +37,7 @@ x1 >= 0
 x2 >= 0
 
 max
-L = 445x1 + 598x2 + 177x3
+L = 445x1 + 598x2 + 177x3 | Quantidade de produto A fabricados, Quantidade de produto B fabricados, Quantidade de produto C fabricados
 1,5x1 + 0,8x2 + 0,6x3 <= 480
 15x1 + 10x2 + 5x3 <= 4800
 10x1 + 12x2 + 4x3 <= 4000

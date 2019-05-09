@@ -9,11 +9,14 @@ import static solver.utils.Utils.writeWorkbook;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -22,6 +25,8 @@ import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFShape;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
+import org.apache.poi.xssf.usermodel.XSSFTextParagraph;
+import org.apache.poi.xssf.usermodel.XSSFTextRun;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import solver.types.Problem;
@@ -38,7 +43,8 @@ public class Solver {
 	public static final String INPUT = RESOURCES.concat("input/");
 
 	public static void main(String[] args) throws Exception {
-		textBox();
+//		textBox();
+		problems();
 	}
 
 	public static void textBox() throws Exception {
@@ -50,11 +56,61 @@ public class Solver {
 			while (it.hasNext()) {
 				XSSFShape shape = it.next();
 				if (shape instanceof XSSFSimpleShape) {
-					XSSFSimpleShape textBox = (XSSFSimpleShape) shape;
-					System.out.println(textBox.getText());
+					XSSFSimpleShape simpleShape = (XSSFSimpleShape) shape;
+					simpleShape.clearText();
+					addVariables(simpleShape, Arrays.asList("Variável 1: x", "Variável 2: y"));
+					addObjective(simpleShape, "L = 2.x + 2.y", "Máx. Lucro");
+					System.out.println(simpleShape.getText());
 				}
 			}
+			writeWorkbook(workbook, getTemporaryFile("temp2"));
 		}
+	}
+
+	private static void addVariables(XSSFSimpleShape simpleShape, List<String> variables) {
+		LinkedList<String> temp = new LinkedList<>(variables);
+		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
+		XSSFTextRun run = paragraph.addNewTextRun();
+		run.setText("Variáveis:");
+		run.setBold(true);
+		while (!temp.isEmpty()) {
+			String variable = temp.remove(0);
+			run = paragraph.addNewTextRun();
+			run.setText("\t".concat(variable));
+			if (temp.size() > 0) {
+				paragraph = simpleShape.addNewTextParagraph();
+			}
+		}
+	}
+	
+	private static void addRestrictions(XSSFSimpleShape simpleShape, List<String> restrictions) {
+		LinkedList<String> temp = new LinkedList<>(restrictions);
+		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
+		XSSFTextRun run = paragraph.addNewTextRun();
+		run.setText("Restrições:");
+		run.setBold(true);
+		while (!temp.isEmpty()) {
+			String variable = temp.remove(0);
+			run = paragraph.addNewTextRun();
+			run.setText("\t".concat(variable));
+			if (temp.size() > 0) {
+				paragraph = simpleShape.addNewTextParagraph();
+			}
+		}
+	}
+
+	private static void addObjective(XSSFSimpleShape simpleShape, String objective, String name) {
+		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
+		XSSFTextRun run = paragraph.addNewTextRun();
+		run.setText("Função Objetivo:");
+		run.setBold(true);
+		if (!StringUtils.isEmpty(name)) {
+			run = paragraph.addNewTextRun();
+			run.setText(" ".concat(name));
+		}
+		run = paragraph.addNewTextRun();
+		run.setBold(true);
+		run.setText("\t".concat(objective));
 	}
 
 	public static void problems() throws Exception {

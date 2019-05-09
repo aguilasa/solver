@@ -25,21 +25,26 @@ public class Problem {
 	@Getter
 	private Set<Variable> variables = new LinkedHashSet<>();
 
-	public void setObjective(Objective objective) {
+	public void setObjective(Objective objective, List<String> names) {
 		this.objective = objective;
-		processVariables();
+		processVariables(names);
 	}
 
 	public void addRestriction(Restriction restriction) {
 		restrictions.add(restriction);
 	}
 
-	private void processVariables() {
+	private void processVariables(List<String> names) {
+		int i = 0;
 		variables.clear();
 		List<Token<?>> tokens = objective.getTokens();
 		for (Token<?> token : tokens) {
 			if (token instanceof Composition) {
-				variables.add(((Composition) token).getVariable());
+				Variable variable = ((Composition) token).getVariable();
+				if (i < names.size()) {
+					variable.setName(names.get(i++));
+				}
+				variables.add(variable);
 			}
 		}
 	}

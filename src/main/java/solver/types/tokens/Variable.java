@@ -15,6 +15,8 @@ public class Variable implements Token<String> {
 
 	private String value;
 
+	private String name;
+
 	@Override
 	public String toString() {
 		return value;
