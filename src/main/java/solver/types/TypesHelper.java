@@ -61,26 +61,34 @@ public class TypesHelper {
 	}
 
 	private static void setProblemType(String line, Problem problem) {
+		String[] values = line.split("\\|");
+		if (values.length == 2) {
+			line = values[0].trim();
+			problem.setName(values[1].trim());
+		}
 		ProblemType problemType = ProblemType.getEnum(line);
 		problem.setProblemType(problemType);
 	}
 
 	private static void setObjective(String line, Problem problem) {
 		Objective objective = new Objective();
-
 		List<String> names = null;
 		String[] values = line.split("\\|");
 		if (values.length == 2) {
 			line = values[0].trim();
 			names = getNames(values[1]);
 		}
-
 		processFunction(line, objective);
 		problem.setObjective(objective, names);
 	}
 
 	private static void setRestriction(String line, Problem problem) {
 		Restriction restriction = new Restriction();
+		String[] values = line.split("\\|");
+		if (values.length == 2) {
+			line = values[0].trim();
+			restriction.setName(values[1].trim());
+		}
 		processFunction(line, restriction);
 		problem.addRestriction(restriction);
 	}

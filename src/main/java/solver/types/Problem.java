@@ -19,11 +19,16 @@ public class Problem {
 
 	@Getter
 	private Objective objective;
+
 	@Getter
 	private List<Restriction> restrictions = new LinkedList<>();
 
 	@Getter
 	private Set<Variable> variables = new LinkedHashSet<>();
+
+	@Getter
+	@Setter
+	private String name = "";
 
 	public void setObjective(Objective objective, List<String> names) {
 		this.objective = objective;

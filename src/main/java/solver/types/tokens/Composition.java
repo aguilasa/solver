@@ -17,7 +17,7 @@ public class Composition implements Token<FloatPrimitive> {
 	@Override
 	public String toString() {
 		if (value.getValue() != 1F) {
-			return String.format("%s%s", value.toString(), variable.toString());
+			return String.format("%s.%s", value.toString(), variable.toString());
 		}
 		return variable.toString();
 	}

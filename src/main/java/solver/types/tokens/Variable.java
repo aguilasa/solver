@@ -15,6 +15,7 @@ public class Variable implements Token<String> {
 
 	private String value;
 
+	@EqualsAndHashCode.Exclude
 	private String name;
 
 	@Override

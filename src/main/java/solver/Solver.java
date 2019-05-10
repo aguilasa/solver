@@ -15,6 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -43,74 +45,7 @@ public class Solver {
 	public static final String INPUT = RESOURCES.concat("input/");
 
 	public static void main(String[] args) throws Exception {
-//		textBox();
 		problems();
-	}
-
-	public static void textBox() throws Exception {
-		try (XSSFWorkbook workbook = readWorkbook(INPUT.concat("pasta.xlsx"));) {
-			XSSFSheet sheet = workbook.getSheetAt(0);
-			XSSFDrawing drawing = sheet.getDrawingPatriarch();
-			List<XSSFShape> shapes = drawing.getShapes();
-			Iterator<XSSFShape> it = shapes.iterator();
-			while (it.hasNext()) {
-				XSSFShape shape = it.next();
-				if (shape instanceof XSSFSimpleShape) {
-					XSSFSimpleShape simpleShape = (XSSFSimpleShape) shape;
-					simpleShape.clearText();
-					addVariables(simpleShape, Arrays.asList("Variável 1: x", "Variável 2: y"));
-					addObjective(simpleShape, "L = 2.x + 2.y", "Máx. Lucro");
-					System.out.println(simpleShape.getText());
-				}
-			}
-			writeWorkbook(workbook, getTemporaryFile("temp2"));
-		}
-	}
-
-	private static void addVariables(XSSFSimpleShape simpleShape, List<String> variables) {
-		LinkedList<String> temp = new LinkedList<>(variables);
-		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
-		XSSFTextRun run = paragraph.addNewTextRun();
-		run.setText("Variáveis:");
-		run.setBold(true);
-		while (!temp.isEmpty()) {
-			String variable = temp.remove(0);
-			run = paragraph.addNewTextRun();
-			run.setText("\t".concat(variable));
-			if (temp.size() > 0) {
-				paragraph = simpleShape.addNewTextParagraph();
-			}
-		}
-	}
-	
-	private static void addRestrictions(XSSFSimpleShape simpleShape, List<String> restrictions) {
-		LinkedList<String> temp = new LinkedList<>(restrictions);
-		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
-		XSSFTextRun run = paragraph.addNewTextRun();
-		run.setText("Restrições:");
-		run.setBold(true);
-		while (!temp.isEmpty()) {
-			String variable = temp.remove(0);
-			run = paragraph.addNewTextRun();
-			run.setText("\t".concat(variable));
-			if (temp.size() > 0) {
-				paragraph = simpleShape.addNewTextParagraph();
-			}
-		}
-	}
-
-	private static void addObjective(XSSFSimpleShape simpleShape, String objective, String name) {
-		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
-		XSSFTextRun run = paragraph.addNewTextRun();
-		run.setText("Função Objetivo:");
-		run.setBold(true);
-		if (!StringUtils.isEmpty(name)) {
-			run = paragraph.addNewTextRun();
-			run.setText(" ".concat(name));
-		}
-		run = paragraph.addNewTextRun();
-		run.setBold(true);
-		run.setText("\t".concat(objective));
 	}
 
 	public static void problems() throws Exception {
@@ -120,13 +55,14 @@ public class Solver {
 			for (Problem p : problems) {
 				create(p, workbook, ++count);
 			}
+			workbook.removeSheetAt(0);
 			writeWorkbook(workbook, getTemporaryFile("temp", true));
 		}
 	}
 
 	public static final void create(Problem problem, XSSFWorkbook workbook, int index) throws FileNotFoundException, IOException {
 		Map<Variable, String> variableCells = new LinkedHashMap<>();
-		Sheet sheet = workbook.createSheet(String.format("Problema%s", index));
+		XSSFSheet sheet = workbook.cloneSheet(0, String.format("Problema%s", index));
 		sheet.setColumnWidth(0, 4000);
 
 		int total = problem.getVariables().size() + problem.getRestrictions().size() + 6;
@@ -194,6 +130,95 @@ public class Solver {
 			cell.setCellValue(restriction.getLimit().getValue());
 		}
 
+		addTextBox(sheet, problem);
+	}
+
+	private static void addTextBox(XSSFSheet sheet, Problem problem) {
+		XSSFSimpleShape simpleShape = getSimpleShape(sheet);
+		if (simpleShape != null) {
+			addVariables(simpleShape, problem.getVariables());
+			addObjective(simpleShape, problem.getObjective().toString(), problem.getName());
+			addRestrictions(simpleShape, problem.getRestrictions(), problem.getVariables());
+		}
+	}
+
+	private static void addVariables(XSSFSimpleShape simpleShape, Set<Variable> set) {
+		LinkedList<Variable> temp = new LinkedList<>(set);
+		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
+		XSSFTextRun run = paragraph.addNewTextRun();
+		run.setText("Variáveis:");
+		run.setBold(true);
+		while (!temp.isEmpty()) {
+			Variable variable = temp.remove(0);
+			run = paragraph.addNewTextRun();
+			run.setText(String.format("\t%s: %s", variable.getName(), variable.getValue()));
+			if (temp.size() > 0) {
+				paragraph = simpleShape.addNewTextParagraph();
+			}
+		}
+	}
+
+	private static void addRestrictions(XSSFSimpleShape simpleShape, List<Restriction> list, Set<Variable> variables) {
+		List<Restriction> restrictions = list.stream().filter(r -> !r.getName().equalsIgnoreCase("NN")).collect(Collectors.toList());
+		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
+		XSSFTextRun run = paragraph.addNewTextRun();
+		run.setText("Restrições:");
+		run.setBold(true);
+		for (Restriction restriction : restrictions) {
+			paragraph = simpleShape.addNewTextParagraph();
+			run = paragraph.addNewTextRun();
+			run.setText(String.format("%s: \t", restriction.getName()));
+			run = paragraph.addNewTextRun();
+			run.setText(restriction.toString());
+			run.setBold(true);
+		}
+
+		StringBuilder sb = new StringBuilder();
+		LinkedList<Variable> temp = new LinkedList<>(variables);
+		while (!temp.isEmpty()) {
+			Variable variable = temp.remove(0);
+			sb.append(variable.getValue());
+			if (temp.size() > 0) {
+				sb.append(",");
+			}
+			sb.append(" ");
+		}
+
+		paragraph = simpleShape.addNewTextParagraph();
+		run = paragraph.addNewTextRun();
+		run.setText("Não negatividade: ");
+		run = paragraph.addNewTextRun();
+		run.setText(String.format("%s >= 0", sb.toString()));
+		run.setBold(true);
+	}
+
+	private static void addObjective(XSSFSimpleShape simpleShape, String objective, String name) {
+		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
+		XSSFTextRun run = paragraph.addNewTextRun();
+		run.setText("Função Objetivo:");
+		run.setBold(true);
+		if (!StringUtils.isEmpty(name)) {
+			run = paragraph.addNewTextRun();
+			run.setText(" ".concat(name).concat(" "));
+		}
+		run = paragraph.addNewTextRun();
+		run.setBold(true);
+		run.setText("\t".concat(objective));
+	}
+
+	private static XSSFSimpleShape getSimpleShape(XSSFSheet sheet) {
+		XSSFDrawing drawing = sheet.getDrawingPatriarch();
+		List<XSSFShape> shapes = drawing.getShapes();
+		Iterator<XSSFShape> it = shapes.iterator();
+		while (it.hasNext()) {
+			XSSFShape shape = it.next();
+			if (shape instanceof XSSFSimpleShape) {
+				XSSFSimpleShape simpleShape = (XSSFSimpleShape) shape;
+				simpleShape.clearText();
+				return simpleShape;
+			}
+		}
+		return null;
 	}
 
 	private static String getFormulaFromTokens(List<Token<?>> tokens, Map<Variable, String> variableCells) {
