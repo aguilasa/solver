@@ -36,6 +36,7 @@ import solver.types.ProblemType;
 import solver.types.Restriction;
 import solver.types.TypesHelper;
 import solver.types.tokens.Composition;
+import solver.types.tokens.FractionComposition;
 import solver.types.tokens.Token;
 import solver.types.tokens.Variable;
 
@@ -79,12 +80,12 @@ public class Solver {
 		Cell cell = row.createCell(0);
 		cell.setCellStyle(left);
 		ProblemType problemType = problem.getProblemType();
-		cell.setCellValue(problemType.equals(ProblemType.MAX) ? "M·ximo" : "MÌnimo");
+		cell.setCellValue(problemType.equals(ProblemType.MAX) ? "M√°ximo" : "M√≠nimo");
 
 		row = sheet.getRow(++rowNumber);
 		cell = row.createCell(0);
 		cell.setCellStyle(left);
-		cell.setCellValue("Vari·veis");
+		cell.setCellValue("Vari√°veis");
 
 		for (Variable v : problem.getVariables()) {
 			row = sheet.getRow(++rowNumber);
@@ -98,7 +99,7 @@ public class Solver {
 		row = sheet.getRow(++rowNumber);
 		cell = row.createCell(0);
 		cell.setCellStyle(left);
-		cell.setCellValue("FunÁ„o Objetivo");
+		cell.setCellValue("Fun√ß√£o Objetivo");
 
 		cell = row.createCell(1);
 		cell.setCellStyle(right);
@@ -108,7 +109,7 @@ public class Solver {
 		row = sheet.getRow(++rowNumber);
 		cell = row.createCell(0);
 		cell.setCellStyle(center);
-		cell.setCellValue("RestriÁıes");
+		cell.setCellValue("Restri√ß√µes");
 
 		int i = 0;
 		for (Restriction restriction : problem.getRestrictions()) {
@@ -146,7 +147,7 @@ public class Solver {
 		LinkedList<Variable> temp = new LinkedList<>(set);
 		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
 		XSSFTextRun run = paragraph.addNewTextRun();
-		run.setText("Vari·veis:");
+		run.setText("Vari√°veis:");
 		run.setBold(true);
 		while (!temp.isEmpty()) {
 			Variable variable = temp.remove(0);
@@ -162,7 +163,7 @@ public class Solver {
 		List<Restriction> restrictions = list.stream().filter(r -> !r.getName().equalsIgnoreCase("NN")).collect(Collectors.toList());
 		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
 		XSSFTextRun run = paragraph.addNewTextRun();
-		run.setText("RestriÁıes:");
+		run.setText("Restri√ß√µes:");
 		run.setBold(true);
 		for (Restriction restriction : restrictions) {
 			paragraph = simpleShape.addNewTextParagraph();
@@ -186,7 +187,7 @@ public class Solver {
 
 		paragraph = simpleShape.addNewTextParagraph();
 		run = paragraph.addNewTextRun();
-		run.setText("N„o negatividade: ");
+		run.setText("N√£o negatividade: ");
 		run = paragraph.addNewTextRun();
 		run.setText(String.format("%s >= 0", sb.toString()));
 		run.setBold(true);
@@ -195,7 +196,7 @@ public class Solver {
 	private static void addObjective(XSSFSimpleShape simpleShape, String objective, String name) {
 		XSSFTextParagraph paragraph = simpleShape.addNewTextParagraph();
 		XSSFTextRun run = paragraph.addNewTextRun();
-		run.setText("FunÁ„o Objetivo:");
+		run.setText("Fun√ß√£o Objetivo:");
 		run.setBold(true);
 		if (!StringUtils.isEmpty(name)) {
 			run = paragraph.addNewTextRun();
@@ -227,6 +228,13 @@ public class Solver {
 			if (token instanceof Composition) {
 				Composition composition = (Composition) token;
 				sb.append(composition.getValue().toString().replace(",", "."));
+				sb.append("*");
+				sb.append(variableCells.get(composition.getVariable()));
+			} else if (token instanceof FractionComposition) {
+				FractionComposition composition = (FractionComposition) token;
+				sb.append(composition.getValue().getValue().getNumerator());
+				sb.append("/");
+				sb.append(composition.getValue().getValue().getDenominator());
 				sb.append("*");
 				sb.append(variableCells.get(composition.getVariable()));
 			} else {

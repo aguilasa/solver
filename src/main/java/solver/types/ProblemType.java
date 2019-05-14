@@ -16,7 +16,7 @@ public enum ProblemType {
 				return t;
 			}
 		}
-		throw new RuntimeException(String.format("EnumeraÁ„o %s n„o encontrada.", value));
+		throw new RuntimeException(String.format("Enumera√ß√£o %s n√£o encontrada.", value));
 	}
 
 	@Override

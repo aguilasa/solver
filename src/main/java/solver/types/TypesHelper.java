@@ -16,12 +16,16 @@ import org.apache.commons.lang.StringUtils;
 import solver.types.tokens.Comparation;
 import solver.types.tokens.Composition;
 import solver.types.tokens.FloatPrimitive;
+import solver.types.tokens.Fraction;
+import solver.types.tokens.FractionComposition;
+import solver.types.tokens.FractionPrimitive;
 import solver.types.tokens.Operation;
 import solver.types.tokens.Variable;
 
 public class TypesHelper {
 
 	private static final String COMPOSITION = "([0-9]+(,[0-9]+)*)*([a-zA-Z]+[0-9]*)";
+	private static final String FRACTION = "([0-9]+)(\\/)([0-9]+)([a-zA-Z]+[0-9]*)";
 	private static final int INDEX_TYP = 0;
 	private static final int INDEX_OBJ = 1;
 
@@ -109,6 +113,8 @@ public class TypesHelper {
 			function.addToken(new Comparation(element));
 		} else if (isOperation(element)) {
 			function.addToken(new Operation(element));
+		} else if (isFractionComposition(element)) {
+			function.addToken(processFractionComposition(element));
 		} else if (isComposition(element)) {
 			function.addToken(processComposition(element));
 		} else if (isFloat(element)) {
@@ -131,6 +137,22 @@ public class TypesHelper {
 		return composition;
 	}
 
+	private static FractionComposition processFractionComposition(String element) {
+		FractionComposition composition = new FractionComposition();
+
+		Pattern pattern = Pattern.compile(FRACTION);
+		Matcher matcher = pattern.matcher(element);
+		if (matcher.find()) {
+			Fraction fraction = new Fraction(Integer.valueOf(matcher.group(1)), Integer.valueOf(matcher.group(3)));
+			FractionPrimitive fractionPrimitive = new FractionPrimitive(fraction);
+			String value = matcher.group(4);
+			composition.setValue(fractionPrimitive);
+			composition.setVariable(new Variable(value, ""));
+		}
+
+		return composition;
+	}
+
 	private static boolean isOperation(String element) {
 		return element.equals("+") || element.equals("-"); // || element.equals(".") || element.equals("/");
 	}
@@ -143,12 +165,28 @@ public class TypesHelper {
 		return element.matches(COMPOSITION);
 	}
 
+	private static boolean isFractionComposition(String element) {
+		return element.matches(FRACTION);
+	}
+
 	private static boolean isComparation(String element) {
 		return element.equals("=") || element.equals(">=") || element.equals("<=");
 	}
 
 	private static List<String> getElements(String str) {
 		return Collections.list(new StringTokenizer(str, " ")).stream().map(token -> ((String) token).trim()).collect(Collectors.toList());
+	}
+
+	public static void main(String[] args) {
+		Pattern pattern = Pattern.compile(FRACTION);
+		Matcher matcher = pattern.matcher("2/2x1");
+		if (matcher.find()) {
+			System.out.println(matcher.group(1));
+			System.out.println(matcher.group(2));
+			System.out.println(matcher.group(3));
+			System.out.println(matcher.group(4));
+			System.out.println();
+		}
 	}
 
 }

@@ -5,6 +5,13 @@ z = 2x1 + 7x2 | Variável 1, Variável 2
 x1 >= 0 | NN
 x2 >= 0 | NN
 
+max
+z = 2x1 + 7x2 | Variável 1, Variável 2
+3x1 + 2x2 >= 20 | Restrição 1
+8/2x1 + 8/2x2 = 32 | Restrição 2
+x1 >= 0 | NN
+x2 >= 0 | NN
+
 min
 z = x1 + 2x2 | Variável 1, Variável 2
 5x1 - 5x2 >= 10 | Restrição 1
